@@ -275,6 +275,24 @@ $$
 
 For this specific problem, with $\Delta x = 0.01, \hspace{0.1cm} \Delta t = 0.01$, the global discrete error is of order $10^{-2}$.  
 The following three images compare the exact and numerical solutions. The first two images show a 3D comparison for all the times and all over the 
-space domain $[a,b]$, the last one shows the comparison for three specific time instants: $T/3, 2T/3, T$.
+space domain $[a,b]$, the last one shows the comparison for three specific time instants: $\frac{T}{3}, \hspace{0.1cm} \frac{2T}{3}, \hspace{0.1cm} T$.
 
+<br>
+<br>
 
+![3D comparison between exact and numerical solutions - view 1](Images_Readme/Contrast_3D_numerical_and_exact_image_1.png)
+
+<br>
+<br>
+
+![3D comparison between exact and numerical solutions - view 2](Images_Readme/Contrast_3D_numerical_and_exact_image_2.png)
+
+<br>
+<br>
+
+![2D comparison between exact and numerical solutions](Images_Readme/Contrast_2D_numerical_and_exact.png)
+
+<br>
+
+The numerical method performs well: at the first time section, for $t = \frac{T}{3}$, the maximum error is of order $10^{-3}$, at the second instant the error is
+of order $10^{-4}$, and at the last instant the error is of order $10^{-5}$.
