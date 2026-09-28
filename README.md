@@ -1,3 +1,5 @@
+
+
 # 1D Heat Diffusion PDE Solver
 
 This project implements an implicit finite-difference method in Python for the numerical solution of the one-dimensional heat diffusion 
@@ -20,7 +22,7 @@ $$
 The equation is supplemented with Dirichlet boundary conditions of the form:
 
 $$
-u(a,t)=\phi(t), \qquad u(b,t)=\psi(t), \qquad \forall t\in[0,T],
+u(a,t)=\varphi(t), \qquad u(b,t)=\psi(t), \qquad \forall t\in[0,T],
 $$
 
 and the initial condition:
@@ -41,20 +43,20 @@ on a bar or the diffusion of a colorant in a river.
 The spatial interval $[a,b]$ and the time interval $[0,T]$ are partitioned into sub-intervals whose endpoints are:
 
 $$
-a = x_0 < x_1 < x_2 < ... < x_{N_x-1} < x_{N_x} = b
+a = x_1 < x_2 < x_3 < ... < x_{N_x-1} < x_{N_x} = b
 $$
 
 and
 
 $$
-0 = t_0 < t_1 < t_2 < ... < t_{N_t-1} < t_{N_t} = T
+0 = t_1 < t_2 < t_3 < ... < t_{N_t-1} < t_{N_t} = T
 $$
 
 The sets of those points are called *meshes*, so:
 
 $$ 
-mesh \textunderscore x = \\{ a, x_1, x_2, ..., x_{N_x} \\},   \qquad 
-mesh \textunderscore t = \\{ 0, t_1, t_2, ..., t_{N_t} \\}
+mesh \textunderscore x = \\{ a, x_2, x_3, ..., x_{N_x} \\},   \qquad 
+mesh \textunderscore t = \\{ 0, t_2, t_3, ..., t_{N_t} \\}
 $$
 
 The elements of the meshes are called *nodes*. If the distance of two contiguous points is always constant the mesh is said to be *uniform*.
@@ -132,5 +134,107 @@ $$
 
 ## Implicit finite-difference scheme
 
-[work in progress]
+Using the backward finite difference for the time derivative and the centered finite difference for the second spatial derivative, the numerical method
+for approximating the given heat equation becomes:
+
+
+$$
+\frac{ u_j^m - u_j^{m-1} }{\Delta t} - \frac{ u_{j+1}^m - 2u_j^m + u_{j-1}^m }{ \Delta x^2 }  =  f(x_j,t_m).
+$$
+
+Multiplying by $\Delta t$ and rearranging the terms, we obtain:
+
+$$
+u_j^m - \left( u_{j+1}^m - 2u_j^m + u_{j-1}^m \right) \cdot \frac{ \Delta t}{ \Delta x^2 } =  f(x_j,t_m) \cdot \Delta t  +  u_j^{m-1}.
+$$
+
+Since the values at the boundary nodes are already known from the Dirichlet conditions, only the internal nodes $x_j$ for $j=2,\ldots, N_x-1$ are unknown, in fact:
+
+$$
+\forall m = 1, ..., N_t  \qquad u(x_1, t_m) = u(a, t_m) = \varphi(t_m) ,  \qquad  u(x_{N_x}, t_m) = u(b, t_m) = \psi(t_m)
+$$
+
+At every time step $t_m$, the method therefore requires the solution of a linear system
+
+$$
+A \cdot x_m = b_m 
+$$
+
+where $A$ is the $(N_x - 2) \times (N_x - 2)$ matrix of the form:
+
+$$
+A=
+\begin{pmatrix}
+1+2\frac{\Delta t}{\Delta x^2}   &    -\frac{\Delta t}{\Delta x^2}      &                                  &                                         \\
+-\frac{\Delta t}{\Delta x^2}     &    1+2\frac{\Delta t}{\Delta x^2}    & -\frac{\Delta t}{\Delta x^2}     &                                         \\
+                                 &    \ddots                            & \ddots                           & \ddots                                  \\
+                                 &                                      & -\frac{\Delta t}{\Delta x^2}     & 1+2\frac{\Delta t}{\Delta x^2}
+\end{pmatrix}.
+$$
+
+The right-hand side $b_m$ can be written schematically as
+
+$$
+b_m \hspace{0.2cm} = \hspace{0.2cm}  u_{\mathrm{prec}} \hspace{0.2cm} + \hspace{0.2cm} 
+\Delta t \cdot f^m \hspace{0.2cm} + \hspace{0.2cm} 
+\mathrm{RHS}_{\mathrm{bordo}} \hspace{0.1cm}  ,
+$$
+
+where:
+
+$$
+u_{\mathrm{prec}} = 
+\begin{pmatrix}
+u_2^{m-1}  \\
+u_3^{m-1}  \\
+\vdots     \\
+u_{N_x-1}^{m-1}
+\end{pmatrix},
+                    \hspace{2cm}
+f^m = 
+\begin{pmatrix}
+f(x_2,t_m)  \\
+f(x_3,t_m)  \\
+\vdots     \\
+f(x_{N_x-1},t_m)
+\end{pmatrix},
+                    \hspace{2cm}
+\mathrm{RHS}_{\mathrm{bordo}} \hspace{0.1cm} = \hspace{0.1cm}  
+\frac{\Delta t}{\Delta x^2}  \cdot 
+\begin{pmatrix}
+\varphi(t_m) \\
+0         \\
+\vdots    \\
+0         \\
+\psi(t_m)
+\end{pmatrix}.                    
+$$
+
+The matrix $A$ does not depend on the time index $m$, therefore it is possible to compute its $LU$ factorization once in the beginning 
+and reuse it at every time step in order to optimize the computational cost of the resolution of the given linear systems.  
+
+Since the numerical method requires the resolution of systems of equations at every step, it is implicit. This numerical scheme is known as *Backward Euler*, in 
+contrast to the explicit method *Forward Euler*. The latter does not require the solution of a linear system at each time step, but as an explicit method, 
+its region of stability imposes a restriction on the relation between $\Delta x$ and $\Delta t$.
+
+The resulting method is first-order accurate in time and second-order accurate in space, this means that:
+
+$$
+\mathrm{Err} = O(\Delta t + \Delta x^2).
+$$
+
+Moreover, as the initial condition imposes:
+
+$$
+u(x_j,0) = h(x_j)  \qquad \forall j = 1,2, \dots, N_x,
+$$
+
+for this reason, for $m=1$ it is not required to solve a linear system. In fact, the assignment of the values $h(x_j)$ to $u(x_j,0)$ acts as the initial base case 
+that allows the method to start.
+
+---
+
+## Validation against an analytical solution
+
+The numerical method has been tested on a problem for which the exact solution is known.
 
