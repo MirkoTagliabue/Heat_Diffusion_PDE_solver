@@ -1,0 +1,5 @@
+In order to  run the script, the following python libreries are needed:
+
+- numpy
+- scipy
+- matplotlib
