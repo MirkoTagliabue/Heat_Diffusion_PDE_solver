@@ -238,3 +238,43 @@ that allows the method to start.
 
 The numerical method has been tested on a problem for which the exact solution is known.
 
+We consider $a=0, \hspace{0.1cm}b=1$ with the following Dirichlet boundary conditions:
+
+$$
+u(0,t) = \varphi(t) = 0 ,   \qquad   u(1,t) = \psi(t) = 0,
+$$
+
+also we assume zero source term: $f(x,t)=0$, and initial condition $u(x,0)=\sin(\pi x).$
+
+For this specific problem, the analytical solution is:
+
+$$
+u(x,t) = e^{-\pi^2 t}\sin(\pi x).
+$$
+
+Indeed,
+
+$$
+u_t(x,t) = -\pi^2e^{-\pi^2t}\sin(\pi x),  \qquad
+u_{xx}(x,t) = -\pi^2e^{-\pi^2t}\sin(\pi x),
+$$
+
+and therefore $u_t-u_{xx}=0$.  
+
+The script `validation.py` compares the analytical and numerical solutions by:
+
+- plotting both solutions as surfaces over the space-time domain;
+- comparing one-dimensional spatial sections at three selected time instants;
+- computing the maximum absolute error on the space-time mesh.
+
+The global discrete error is measured as
+
+$$
+E_{\infty} = \max_{j,m} \left| u_j^m - u_{\mathrm{exact}}(x_j,t_m) \right|.
+$$
+
+For this specific problem, with $\Delta x = 0.01, \hspace{0.1cm} \Delta t = 0.01$, the global discrete error is of order $10^{-2}$.  
+The following three images compare the exact and numerical solutions. The first two images show a 3D comparison for all the times and all over the 
+space domain $[a,b]$, the last one shows the comparison for three specific time instants: $T/3, 2T/3, T$.
+
+
